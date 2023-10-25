@@ -13,21 +13,6 @@ from rest_framework.permissions import IsAuthenticated
 def index(request):
     return render(request, 'index.html', {})
 
-class menuView(APIView):
-    def get(self, request):
-        queryset = Menu.objects.all()
-        serialized_item = MenuSerializer(queryset, many=True)
-
-        return Response(serialized_item.data, status=200)
-    
-    def post(self, request):
-        serialized_item = MenuSerializer(data=request.data)
-
-        if serialized_item.is_valid():
-            serialized_item.save()
-
-        return Response({'status': 'success', 'data': serialized_item.data})
-
 class MenuItemView(generics.ListCreateAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
