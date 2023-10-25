@@ -1,42 +1,37 @@
 from django.shortcuts import render
-from rest_framework.views import APIView
 # Create your views here.
 from rest_framework.response import Response 
 from django.shortcuts import render
 from rest_framework import generics
 from .models import Booking, Menu
 from .serializers import BookingSerializer, MenuSerializer
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated 
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 
 # Create your views here.
 def index(request):
     return render(request, 'index.html', {})
 
-class menuView(APIView):
-    def get(self, request):
-        queryset = Menu.objects.all()
-        serialized_item = MenuSerializer(queryset, many=True)
-
-        return Response(serialized_item.data, status=200)
-    
-    def post(self, request):
-        serialized_item = MenuSerializer(data=request.data)
-
-        if serialized_item.is_valid():
-            serialized_item.save()
-
-        return Response({'status': 'success', 'data': serialized_item.data})
-
-class MenuItemView(generics.ListCreateAPIView):
+class MenuItemsView(generics.ListCreateAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
+    permission_classes = [IsAuthenticated]
 
 class SingleMenuItemView(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
     queryset = Menu.objects.all()
     serializer_class = MenuSerializer
     lookup_field = 'pk'
+    permission_classes = [IsAuthenticated]
 
 class BookingViewSet(viewsets.ModelViewSet):
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+@api_view()
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def msg(request):
+    return Response({"message":"This view is protected"})
